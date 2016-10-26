@@ -1,0 +1,53 @@
+---
+# The variables file used by the playbooks in the development host.
+# These don't have to be explicitly imported by vars_files: they are autopopulated.
+
+nginx_version: release-1.7.11
+
+#
+# If compiling the nginx-rtmp-module make sure you override both the nginx_rtmp_module
+# variable, and the nginx_config variable, use the options below as a starting point and
+# add in '--add-module=../modules/rtmp'
+#
+# Also for debugging purposes, add in '--with-debug' as well
+#
+
+nginx_config:
+  [
+  '--sbin-path=/usr/local/sbin',
+  '--conf-path=/etc/nginx/nginx.conf',
+  '--error-log-path=/var/log/nginx/error.log',
+  '--pid-path=/var/run/nginx.pid',
+  '--with-ipv6'
+  ]
+
+#
+# nginx_rtmp repository address
+# Probably should be overridden to point to new location
+# as original location seems to be abandoned
+# new location as of June 2016:
+#
+#
+nginx_rtmp_repo: "https://github.com/nginx/nginx.git"
+
+#modules to install
+nginx_rtmp_module: true
+nginx_rtmp_module_version: v1.1.7
+nginx_rtmp_module_port: 1935
+nginx_rtmp_module_videos_path: "/var/videos"
+nginx_rtmp_module_sample_video_url: "http://www.html5videoplayer.net/videos/toystory.mp4"
+nginx_rtmp_module_publish_ip:
+- 127.0.0.1
+
+recompile: false #Override if you want to rebuild nginx
+
+nginx_max_clients: 1024
+nginx_worker_processes: 1  # This needs to be set to one for nginx_rtmp to behave properly, especially the control module
+
+nginx_http_params:
+  sendfile: "on"
+  tcp_nopush: "on"
+  tcp_nodelay: "on"
+  keepalive_timeout: "65"
+  access_log: "/var/log/nginx/access.log"
+  error_log: "/var/log/nginx/error.log"

@@ -1,0 +1,28 @@
+---
+# These tasks install the nginx-rtmp module, included as needed into the nginx build
+# Based upon: https://github.com/Hounddog/vagrant-ansible/blob/master/provisioning/roles/nginx/tasks/main.yml
+
+- name: Create videos directory
+  file: path={{ nginx_rtmp_module_videos_path }} state=directory owner=root group=root mode=0755
+
+- name: Add rtmp.conf config
+  template: src=rtmp.conf.j2 dest=/etc/nginx/rtmp.conf
+  notify:
+    - restart nginx
+
+- name: Create Recording Directory (/tmp/rec)
+  file: path=/tmp/rec state=directory owner=www-data group=www-data mode=0777
+# TODO: Make the path a variable set in a file, this should be configurable depending on the box.
+
+- name: Add directory creation to rc.local
+  lineinfile:
+    dest: '/etc/rc.local'
+    regexp: '/tmp/rec/'
+    line: "if [ ! -d /var/run/foo ]; then mkdir /tmp/rec && chown www-data:www-data /tmp/rec/; fi"
+    insertbefore: 'exit'
+
+- name: Create Recording Directory (/tmp/rec)
+  file: path=/tmp/hls state=directory owner=www-data group=www-data mode=0777
+
+- name: Download sample video to host over RTMP
+  get_url: url={{ nginx_rtmp_module_sample_video_url }} dest={{ nginx_rtmp_module_videos_path }}/sample.mp4 mode=0744
